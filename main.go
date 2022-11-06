@@ -27,6 +27,7 @@ func main() {
 	startPrompt()
 }
 
+// TODO: Implement history
 func startPrompt() {
 	//scanner := bufio.NewScanner(os.Stdin)
 	reader := bufio.NewReader(os.Stdin)
@@ -54,8 +55,24 @@ func parseQuery(query string) {
 
 	if tokens[0] == "insert" {
 		fmt.Println("parsing insert command")
-	} else if tokens[0] == "select" {
+	} else if tokens[0] == "select" { // select * from table
 		fmt.Println("parsing select command")
+		selCtx := command.SelectContext{}
+		var selector command.Selector
+
+		idx := 1
+		for idx < len(tokens) {
+			if tokens[idx] == "from" {
+				break
+			} else {
+				selector.Name = tokens[idx]
+			}
+			idx += 1
+			selCtx.Selectors = append(selCtx.Selectors, selector)
+		}
+
+		selCtx.Table = tokens[idx+1]
+		command.Select(selCtx)
 	} else if tokens[0] == "create" {
 		if tokens[1] == "table" {
 			fmt.Println("parsing command create table")
@@ -86,5 +103,5 @@ func executeCommands() {
 	command.Insert(table, "4")
 	command.Insert(table, "5")
 
-	command.Select(table)
+	//command.Select(table)
 }
