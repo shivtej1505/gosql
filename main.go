@@ -11,11 +11,19 @@ import (
 
 	"github.com/shivtej1505/gosql/command"
 	"github.com/shivtej1505/gosql/utils"
+	jww "github.com/spf13/jwalterweatherman"
+	"github.com/spf13/viper"
 )
 
-func main() {
-	fmt.Println("this is main")
+type Config struct {
+	Directory string `json:"directory"`
+}
 
+type Engine struct {
+	Config Config
+}
+
+func main() {
 	cleanupChan := make(chan os.Signal)
 	signal.Notify(cleanupChan, syscall.SIGTERM, syscall.SIGINT)
 
@@ -25,11 +33,42 @@ func main() {
 		os.Exit(0)
 	}()
 
-	startPrompt()
+	jww.SetLogThreshold(jww.LevelTrace)
+	jww.SetStdoutThreshold(jww.LevelTrace)
+	engine := initEngine()
+	startPrompt(engine)
+}
+
+func initEngine() Engine {
+	viper.Set("Debug", true)
+	viper.Set("Info", true)
+	viper.Set("Verbose", true)
+	viper.AddConfigPath("./")
+	viper.SetConfigName("config")
+	viper.SetConfigType("json")
+	viper.AutomaticEnv()
+
+	var config Config
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		fmt.Errorf("unable to decode into struct, %v", err)
+	}
+
+	err = viper.Unmarshal(&config)
+	if err != nil {
+		fmt.Errorf("unable to decode into struct, %v", err)
+	}
+
+	fmt.Println(viper.GetString("directory"))
+
+	return Engine{
+		Config: config,
+	}
 }
 
 // TODO: Implement history
-func startPrompt() {
+func startPrompt(engine Engine) {
 	//scanner := bufio.NewScanner(os.Stdin)
 	reader := bufio.NewReader(os.Stdin)
 

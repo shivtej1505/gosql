@@ -2,6 +2,8 @@ package command
 
 import (
 	"os"
+
+	"github.com/shivtej1505/gosql/utils"
 )
 
 type CreateTableContext struct {
@@ -16,7 +18,7 @@ type Column struct {
 
 func CreateTable(createTableCtx CreateTableContext) {
 	dir := "data"
-	err := createDir(dir)
+	err := utils.CreateDir(dir)
 	if err != nil {
 		panic(err)
 	}

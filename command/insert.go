@@ -2,8 +2,11 @@ package command
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/shivtej1505/gosql/utils"
 )
 
 type InsertContext struct {
@@ -19,7 +22,7 @@ type Value struct {
 // Give table instance
 func Insert(insertCtx InsertContext) error {
 	dir := "data"
-	err := createDir(dir)
+	err := utils.CreateDir(dir)
 	if err != nil {
 		panic(err)
 	}
@@ -54,6 +57,9 @@ func Insert(insertCtx InsertContext) error {
 			errors.New("invalid value")
 		}
 
+		fmt.Printf("%v took %v bytes\n", val.Value, len(valueBytes))
+		fmt.Println("------")
+
 		writeStream = append(writeStream, valueBytes...)
 	}
 
@@ -63,20 +69,5 @@ func Insert(insertCtx InsertContext) error {
 		return err
 	}
 
-	return nil
-}
-
-func createDir(dir string) error {
-	_, err := os.Stat(dir)
-	// dir exists, nothing to do
-	if err == nil {
-		return nil
-	}
-
-	if os.IsNotExist(err) {
-		if err := os.Mkdir(dir, os.ModePerm); err != nil {
-			return err
-		}
-	}
 	return nil
 }
