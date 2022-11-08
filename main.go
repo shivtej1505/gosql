@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/shivtej1505/gosql/command"
+	"github.com/shivtej1505/gosql/utils"
 )
 
 func main() {
@@ -43,7 +44,9 @@ func startPrompt() {
 			log.Fatal(err)
 		}
 		fmt.Printf("%s\n", query)
-		parseQuery(strings.TrimSuffix(query, ";"))
+		query = strings.TrimPrefix(query, "\n")
+		query = strings.TrimSuffix(query, ";")
+		parseQuery(query)
 	}
 }
 
@@ -53,8 +56,37 @@ func parseQuery(query string) {
 		panic("invalid input")
 	}
 
-	if tokens[0] == "insert" {
+	if tokens[0] == "insert" { // insert into table (id, name) values (1, "Shivang")
 		fmt.Println("parsing insert command")
+		insertCtx := command.InsertContext{}
+		if tokens[1] == "into" {
+			insertCtx.Table = tokens[2]
+
+			idx := 3
+			valueCount := 0
+			for idx < len(tokens) {
+				if tokens[idx] == "values" {
+					break
+				}
+				idx++
+				valueCount++
+			}
+
+			var values []command.Value
+			var value command.Value
+			idx = 3
+			for idx < 3+valueCount {
+				value.Column = utils.RemoveInvalidChars(tokens[idx])
+				value.Value = utils.RemoveInvalidChars(tokens[idx+valueCount+1])
+
+				values = append(values, value)
+				idx++
+			}
+
+			insertCtx.Values = values
+
+			command.Insert(insertCtx)
+		}
 	} else if tokens[0] == "select" { // select * from table
 		fmt.Println("parsing select command")
 		selCtx := command.SelectContext{}
@@ -93,15 +125,4 @@ func parseQuery(query string) {
 			}
 		}
 	}
-}
-
-func executeCommands() {
-	table := "numbers"
-	command.Insert(table, "1")
-	command.Insert(table, "2")
-	command.Insert(table, "3")
-	command.Insert(table, "4")
-	command.Insert(table, "5")
-
-	//command.Select(table)
 }
