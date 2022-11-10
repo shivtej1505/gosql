@@ -1,6 +1,9 @@
 package utils
 
-import "os"
+import (
+	"errors"
+	"os"
+)
 
 func CreateDir(dir string) error {
 	_, err := os.Stat(dir)
@@ -15,4 +18,11 @@ func CreateDir(dir string) error {
 		}
 	}
 	return nil
+}
+
+func FileExists(path string) bool {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+	return true
 }
