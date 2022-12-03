@@ -11,16 +11,31 @@ import (
 	"github.com/shivtej1505/gosql/utils"
 )
 
-type Executor struct {
+type ExecutorImpl struct {
+	Config ExecutorConfig
 }
 
-func NewExecutor() Executor {
-	return Executor{}
+type ExecutorConfig struct {
+	Directory string
+}
+
+func NewExecutor(config ExecutorConfig) Executor {
+	fmt.Println("--- inside New Executor ----")
+	fmt.Println(config)
+	fmt.Println(config.Directory)
+	fmt.Println("------")
+	return &ExecutorImpl{
+		Config: config,
+	}
 }
 
 // Give table instance
-func (exe Executor) Insert(insertCtx context.InsertContext) error {
-	dir := "data"
+func (exe *ExecutorImpl) Insert(insertCtx context.InsertContext) error {
+	fmt.Println("inside executor")
+	fmt.Println(exe)
+	fmt.Println(exe.Config)
+	fmt.Println("------")
+	dir := exe.Config.Directory
 	err := utils.CreateDir(dir)
 	if err != nil {
 		panic(err)
@@ -71,8 +86,8 @@ func (exe Executor) Insert(insertCtx context.InsertContext) error {
 	return nil
 }
 
-func (exe Executor) CreateTable(createTableCtx context.CreateTableContext) error {
-	dir := "data"
+func (exe *ExecutorImpl) CreateTable(createTableCtx context.CreateTableContext) error {
+	dir := exe.Config.Directory
 	err := utils.CreateDir(dir)
 	if err != nil {
 		panic(err)
@@ -94,12 +109,12 @@ func (exe Executor) CreateTable(createTableCtx context.CreateTableContext) error
 }
 
 // Give table instance
-func (exe Executor) Select(selCtx context.SelectContext) error {
+func (exe *ExecutorImpl) Select(selCtx context.SelectContext) error {
 	log.Println(selCtx.Table)
 	log.Println(selCtx.Selectors)
 	log.Println("-----")
 
-	dir := "data"
+	dir := exe.Config.Directory
 
 	if utils.FileExists(dir + "/" + selCtx.Table + ".meta") {
 		meta, err := os.ReadFile(dir + "/" + selCtx.Table + ".meta")

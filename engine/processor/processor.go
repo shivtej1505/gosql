@@ -9,9 +9,19 @@ import (
 )
 
 type Processor struct {
+	Config ProcessorConfig
 }
 
-func (processor Processor) ParseQuery(query string) interface{} {
+type ProcessorConfig struct {
+}
+
+func NewProcessor(config ProcessorConfig) *Processor {
+	return &Processor{
+		Config: config,
+	}
+}
+
+func (processor *Processor) ParseQuery(query string) interface{} {
 	tokens := strings.Split(strings.ToLower(query), " ")
 	if len(tokens) == 0 {
 		panic("invalid input")

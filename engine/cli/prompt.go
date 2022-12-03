@@ -15,7 +15,9 @@ type Prompt struct {
 }
 
 func NewPrompt(engine engine.Engine) Prompt {
-	return Prompt{}
+	return Prompt{
+		Engine: engine,
+	}
 }
 
 // TODO: Implement history
